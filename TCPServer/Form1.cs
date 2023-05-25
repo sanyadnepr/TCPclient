@@ -10,25 +10,34 @@ namespace TCPServer
             InitializeComponent();
         }
 
-        SimpleTcpServer server; 
+        SimpleTcpServer _server; 
 
         private void btnStart_Click(object sender, EventArgs e)
         {
-            server.Start();
-            txtInfo.Text += $"Starting...{Environment.NewLine}";
-            btnStart.Enabled = false;
-            btnSend.Enabled = true;
-
-
+            try
+            {
+                if(_server is {})
+                    _server.Stop();
+                _server = new SimpleTcpServer(txtIP.Text);
+                _server.Events.ClientConnected += Events_ClientConnect;
+                _server.Events.ClientDisconnected += Events_ClientDisconnected;
+                _server.Events.DataReceived += Events_DataReceived;
+                _server.Start();
+                txtInfo.Text += $"Starting {txtIP.Text}...{Environment.NewLine}";
+                btnStart.Enabled = false;
+                btnSend.Enabled = true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Message:{ex.Message}\nStackTrace:{ex.StackTrace}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
             btnSend.Enabled = false;
-            server = new SimpleTcpServer(txtIP.Text);
-            server.Events.ClientConnected += Events_ClientConnect;
-            server.Events.ClientDisconnected += Events_ClientDisconnected;
-            server.Events.DataReceived += Events_DataReceived;
+            
 
         }
 
@@ -61,11 +70,11 @@ namespace TCPServer
 
         private void btnSend_Click(object sender, EventArgs e)
         {
-            if(server.IsListening)
+            if(_server.IsListening)
             {
                 if(!string.IsNullOrEmpty(txtMessage.Text) && LstClientIP.SelectedItem !=null)
                 {
-                    server.Send(LstClientIP.SelectedItem.ToString(), txtMessage.Text);
+                    _server.Send(LstClientIP.SelectedItem.ToString(), txtMessage.Text);
                     txtInfo.Text += $"Server: {txtMessage.Text}{Environment.NewLine}";
                     txtMessage.Text = string.Empty;
 

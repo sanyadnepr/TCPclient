@@ -26,6 +26,16 @@ namespace TCPclient
             */
             try
             {
+                btnSend.Enabled = false;
+                
+                if(client is {})
+                    client.Disconnect();
+                
+                client = new(txtIP.Text);
+                client.Events.Connected += Event_Connected;
+                client.Events.DataReceived += Event_DataReceived;
+                client.Events.Disconnected += Event_Disconnected;
+                
                 client.Connect();
                 btnSend.Enabled = true;
                 btnConnect.Enabled = false;
@@ -50,11 +60,6 @@ namespace TCPclient
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            client = new(txtIP.Text);
-            client.Events.Connected += Event_Connected;
-            client.Events.DataReceived += Event_DataReceived;
-            client.Events.Disconnected += Event_Disconnected;
-            btnSend.Enabled = false;
 
         }
 
